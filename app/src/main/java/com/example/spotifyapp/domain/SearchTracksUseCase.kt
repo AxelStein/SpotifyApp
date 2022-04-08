@@ -24,7 +24,7 @@ class SearchTracksUseCase(
             if (response.isSuccessful) {
                 return@fromCallable response.body()!!.items
             } else {
-                throw Exception()
+                throw Exception(response.errorBody()!!.string())
             }
         }.subscribeOn(single())
     }

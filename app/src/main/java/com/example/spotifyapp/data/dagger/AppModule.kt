@@ -22,7 +22,7 @@ import javax.inject.Singleton
 class AppModule(private val context: Context) {
     @Provides
     @Singleton
-    fun provideDB(): AppDatabase {
+    fun provideDb(): AppDatabase {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,

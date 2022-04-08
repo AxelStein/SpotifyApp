@@ -5,10 +5,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.spotifyapp.R
 import com.example.spotifyapp.data.entities.Track
-import com.example.spotifyapp.databinding.ItemBinding
+import com.example.spotifyapp.databinding.TrackItemBinding
 import com.example.spotifyapp.utils.CompareBuilder
 import com.example.spotifyapp.utils.OnItemClickListener
+import com.example.spotifyapp.utils.inflate
 
 class TrackListAdapter : ListAdapter<Track, TrackListAdapter.ViewHolder>(Companion) {
     companion object : DiffUtil.ItemCallback<Track>() {
@@ -39,7 +41,7 @@ class TrackListAdapter : ListAdapter<Track, TrackListAdapter.ViewHolder>(Compani
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(parent).also { vh ->
+        return ViewHolder(parent.inflate(R.layout.track_item)).also { vh ->
             vh.setOnClickListener { pos ->
                 onItemCLickListener?.onItemClick(pos, getItem(pos))
             }
@@ -52,7 +54,7 @@ class TrackListAdapter : ListAdapter<Track, TrackListAdapter.ViewHolder>(Compani
 
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        private val binding = ItemBinding.bind(itemView)
+        private val binding = TrackItemBinding.bind(itemView)
 
         fun setOnClickListener(l: (pos: Int) -> Unit) {
             binding.container.setOnClickListener {

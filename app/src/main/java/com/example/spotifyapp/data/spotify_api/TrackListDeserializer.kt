@@ -24,9 +24,7 @@ class TrackListDeserializer : JsonDeserializer<TrackListSearchResult> {
             val artists = mutableListOf<String>()
             for (j in 0 until artistsArr.size()) {
                 artistsArr[j].asJsonObject.optString("name").also {
-                    if (it.isNotBlank()) {
-                        artists.add(it)
-                    }
+                    artists.add(it)
                 }
             }
             Track(
@@ -45,12 +43,5 @@ class TrackListDeserializer : JsonDeserializer<TrackListSearchResult> {
             return get(memberName).asString
         }
         return ""
-    }
-
-    private fun JsonObject.optFloat(memberName: String): Float {
-        if (has(memberName)) {
-            return get(memberName).asFloat
-        }
-        return 0f
     }
 }

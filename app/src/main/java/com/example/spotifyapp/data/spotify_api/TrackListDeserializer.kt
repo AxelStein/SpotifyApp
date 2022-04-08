@@ -1,6 +1,6 @@
 package com.example.spotifyapp.data.spotify_api
 
-import com.example.spotifyapp.data.Track
+import com.example.spotifyapp.data.entities.Track
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
@@ -27,13 +27,13 @@ class TrackListDeserializer : JsonDeserializer<TrackListSearchResult> {
                     artists.add(it)
                 }
             }
-            Track(
-                title = trackObj.optString("name"),
-                artists = artists.joinToString(),
-                externalUrl= trackObj.optString("category"),
-            ).also {
-                result.add(it)
-            }
+            result.add(
+                Track(
+                    title = trackObj.optString("name"),
+                    artists = artists.joinToString(),
+                    externalUrl= trackObj.optString("category"),
+                )
+            )
         }
         return TrackListSearchResult(result)
     }

@@ -1,4 +1,4 @@
-package com.example.spotifyapp
+package com.example.spotifyapp.ui.item
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

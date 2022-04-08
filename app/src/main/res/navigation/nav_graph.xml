@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/list_fragment"
-        android:name="com.example.spotifyapp.ListFragment"
+        android:name="com.example.spotifyapp.ui.track_list.TrackListFragment"
         tools:layout="@layout/fragment_list">
 
         <action
@@ -16,7 +16,7 @@
     </fragment>
     <fragment
         android:id="@+id/item_fragment"
-        android:name="com.example.spotifyapp.ItemFragment"
+        android:name="com.example.spotifyapp.ui.item.ItemFragment"
         android:label="@string/second_fragment_label"
         tools:layout="@layout/fragment_item">
 

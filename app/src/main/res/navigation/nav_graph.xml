@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/list_fragment">
+
+    <fragment
+        android:id="@+id/list_fragment"
+        android:name="com.example.spotifyapp.ListFragment"
+        tools:layout="@layout/fragment_list">
+
+        <action
+            android:id="@+id/action_FirstFragment_to_SecondFragment"
+            app:destination="@id/item_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/item_fragment"
+        android:name="com.example.spotifyapp.ItemFragment"
+        android:label="@string/second_fragment_label"
+        tools:layout="@layout/fragment_item">
+
+        <action
+            android:id="@+id/action_SecondFragment_to_FirstFragment"
+            app:destination="@id/list_fragment" />
+    </fragment>
+</navigation>

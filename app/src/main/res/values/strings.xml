@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SpotifyApp</string>
+    <string name="first_fragment_label">List Fragment</string>
+    <string name="second_fragment_label">Item Fragment</string>
+</resources>

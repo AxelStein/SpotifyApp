@@ -9,19 +9,17 @@
         android:id="@+id/list_fragment"
         android:name="com.example.spotifyapp.ui.track_list.TrackListFragment"
         tools:layout="@layout/fragment_list">
-
         <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/item_fragment" />
+            android:id="@+id/action_open_track_detail"
+            app:destination="@id/detail_fragment">
+            <argument
+                android:name="url"
+                app:argType="string" />
+        </action>
     </fragment>
     <fragment
-        android:id="@+id/item_fragment"
-        android:name="com.example.spotifyapp.ui.item.ItemFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_item">
-
-        <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/list_fragment" />
+        android:id="@+id/detail_fragment"
+        android:name="com.example.spotifyapp.ui.track_detail.TrackDetailFragment"
+        tools:layout="@layout/fragment_track_detail">
     </fragment>
 </navigation>

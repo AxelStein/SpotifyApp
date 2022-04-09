@@ -34,9 +34,6 @@ class SearchTracksUseCase(
 
     private fun searchSingle(offsetQueue: LinkedBlockingQueue<Int>, query: String, threadNumber: Int): Single<List<Track>> {
         return Single.fromCallable {
-            try {
-                Thread.sleep(2000)
-            } catch (e: Exception) {}
             searchSpotifyApi(query, offsetQueue.take()).onEach {
                 it.threadNumber = threadNumber
             }

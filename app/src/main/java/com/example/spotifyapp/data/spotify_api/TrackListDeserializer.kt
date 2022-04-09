@@ -27,11 +27,12 @@ class TrackListDeserializer : JsonDeserializer<TrackListSearchResult> {
                     artists.add(it)
                 }
             }
+            val urls = trackObj["external_urls"].asJsonObject
             result.add(
                 Track(
                     title = trackObj.optString("name"),
                     artists = artists.joinToString(),
-                    externalUrl= trackObj.optString("category"),
+                    externalUrl= urls.optString("spotify"),
                 )
             )
         }

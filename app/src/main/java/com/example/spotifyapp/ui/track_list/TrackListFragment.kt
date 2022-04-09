@@ -8,6 +8,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH
 import android.widget.EditText
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -30,7 +31,7 @@ class TrackListFragment : Fragment() {
 
         adapter = TrackListAdapter()
         adapter.setOnItemClickListener { pos, item ->
-            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
+            findNavController().navigate(R.id.action_open_track_detail, bundleOf("url" to item.externalUrl))
         }
         binding.list.adapter = adapter
 

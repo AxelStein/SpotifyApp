@@ -50,13 +50,13 @@ class TrackListViewModel : ViewModel() {
                 dispose()
             }
         }
-        searchDisposable = null
 
         searchTracksUseCase.search(query)
             .doOnSubscribe {
                 loading.postValue(true)
             }
             .doFinally {
+                searchDisposable = null
                 loading.postValue(false)
             }
             .subscribe({}, {

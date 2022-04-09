@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.spotifyapp.data.entities.Track
 import com.example.spotifyapp.data.room.TrackDao
 import com.example.spotifyapp.data.spotify_api.SpotifyApi
+import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.LinkedBlockingQueue
@@ -14,35 +15,37 @@ class SearchTracksUseCase(
     ) {
     private val offsetQueue = LinkedBlockingQueue<Int>()
 
-    fun search(query: String): Single<List<Track>> {
+    fun search(query: String): Flowable<List<Track>> {
         offsetQueue.clear()
         for (i in 0..30 step 10) {
             offsetQueue.add(i)
         }
-        return searchImpl(query, 1).zipWith(searchImpl(query, 2)) { type1, type2 ->
-            type1 + type2
-        }.doAfterSuccess {
+
+        val result = mutableListOf<Track>()
+        return searchSingle(query, 1).zipWith(searchSingle(query, 2)) { list1, list2 ->
+            list1 + list2
+        }.repeatUntil {
+            offsetQueue.isEmpty()
+        }.doOnNext {
+            result.addAll(it)
+        }.doOnComplete {
+            Log.e("TAG", "complete $result")
             trackDao.deleteAll()
-            trackDao.insert(it)
+            trackDao.insert(result)
         }
     }
 
-    private fun searchImpl(query: String, threadNumber: Int): Single<List<Track>> {
+    private fun searchSingle(query: String, threadNumber: Int): Single<List<Track>> {
         return Single.fromCallable {
-            val result = mutableListOf<Track>()
-            while (offsetQueue.isNotEmpty()) {
-                queryFromApi(query, offsetQueue.take()).onEach {
-                    it.threadNumber = threadNumber
-                }.also {
-                    result.addAll(it)
-                }
+            Thread.sleep(1000)
+            queryFromApi(query, offsetQueue.take(), threadNumber).onEach {
+                it.threadNumber = threadNumber
             }
-            result.toList()
         }.subscribeOn(Schedulers.single())
     }
 
-    private fun queryFromApi(query: String, offset: Int): List<Track> {
-        Log.e("TAG", "queryFromApi $query offset=$offset")
+    private fun queryFromApi(query: String, offset: Int, threadNumber: Int): List<Track> {
+        Log.e("TAG", "queryFromApi $query offset=$offset threadNumber=$threadNumber")
         val response = spotifyApi.search(query, offset).execute()
         if (response.isSuccessful) {
             return response.body()!!.items

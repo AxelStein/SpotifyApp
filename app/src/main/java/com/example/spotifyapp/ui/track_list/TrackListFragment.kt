@@ -36,7 +36,7 @@ class TrackListFragment : Fragment() {
         viewModel.trackListLiveData.observe(viewLifecycleOwner) {
             adapter.submitList(it)
         }
-        viewModel.search("Hate You")
+        viewModel.search("Hate")
     }
 
     override fun onDestroyView() {

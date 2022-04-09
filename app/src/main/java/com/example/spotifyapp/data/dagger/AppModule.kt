@@ -11,6 +11,8 @@ import com.example.spotifyapp.domain.SearchTracksUseCase
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
+import io.reactivex.internal.functions.Functions
+import io.reactivex.plugins.RxJavaPlugins
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -39,6 +41,8 @@ class AppModule(private val context: Context) {
     @Provides
     @Singleton
     fun provideSpotifyApi(): SpotifyApi {
+        RxJavaPlugins.setErrorHandler(Functions.emptyConsumer())
+
         val client = OkHttpClient.Builder().addInterceptor(Interceptor { chain ->
             val newRequest: Request = chain.request().newBuilder()
                 .addHeader("Authorization", "Bearer $spotifyToken")

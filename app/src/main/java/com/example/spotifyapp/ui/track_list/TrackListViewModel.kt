@@ -9,6 +9,7 @@ import com.example.spotifyapp.domain.SearchTracksUseCase
 import com.example.spotifyapp.ui.App
 import io.reactivex.android.schedulers.AndroidSchedulers.mainThread
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers.io
 import javax.inject.Inject
 
@@ -26,6 +27,7 @@ class TrackListViewModel : ViewModel() {
     val loadingLiveData = loading as LiveData<Boolean>
 
     private val disposables = CompositeDisposable()
+    private var searchDisposable: Disposable? = null
 
     init {
         App.appComponent.inject(this)
@@ -43,16 +45,24 @@ class TrackListViewModel : ViewModel() {
     }
 
     fun search(query: String) {
+        searchDisposable?.run {
+            if (!isDisposed) {
+                dispose()
+            }
+        }
+        searchDisposable = null
+
         searchTracksUseCase.search(query)
             .doOnSubscribe {
                 loading.postValue(true)
             }
-            .doOnComplete {
+            .doFinally {
                 loading.postValue(false)
             }
             .subscribe({}, {
                 it.printStackTrace()
             }).also {
+                searchDisposable = it
                 disposables.add(it)
             }
     }

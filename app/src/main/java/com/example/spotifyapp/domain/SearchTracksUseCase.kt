@@ -12,16 +12,15 @@ class SearchTracksUseCase(
     private val spotifyApi: SpotifyApi,
     private val trackDao: TrackDao
     ) {
-    private val offsetQueue = LinkedBlockingQueue<Int>()
-
     fun search(query: String): Flowable<List<Track>> {
-        offsetQueue.clear()
+        val offsetQueue = LinkedBlockingQueue<Int>()
         for (i in 0..30 step 10) {
             offsetQueue.add(i)
         }
 
         val result = mutableListOf<Track>()
-        return searchSingle(query, 1).zipWith(searchSingle(query, 2)) { list1, list2 ->
+        return searchSingle(offsetQueue, query, 1).
+        zipWith(searchSingle(offsetQueue, query, 2)) { list1, list2 ->
             list1 + list2
         }.repeatUntil {
             offsetQueue.isEmpty()
@@ -33,16 +32,18 @@ class SearchTracksUseCase(
         }
     }
 
-    private fun searchSingle(query: String, threadNumber: Int): Single<List<Track>> {
+    private fun searchSingle(offsetQueue: LinkedBlockingQueue<Int>, query: String, threadNumber: Int): Single<List<Track>> {
         return Single.fromCallable {
-            Thread.sleep(1000)
-            queryFromApi(query, offsetQueue.take(), threadNumber).onEach {
+            try {
+                Thread.sleep(2000)
+            } catch (e: Exception) {}
+            searchSpotifyApi(query, offsetQueue.take()).onEach {
                 it.threadNumber = threadNumber
             }
         }.subscribeOn(Schedulers.single())
     }
 
-    private fun queryFromApi(query: String, offset: Int, threadNumber: Int): List<Track> {
+    private fun searchSpotifyApi(query: String, offset: Int): List<Track> {
         val response = spotifyApi.search(query, offset).execute()
         if (response.isSuccessful) {
             return response.body()!!.items

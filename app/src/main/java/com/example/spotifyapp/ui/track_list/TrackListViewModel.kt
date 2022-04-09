@@ -40,11 +40,11 @@ class TrackListViewModel : ViewModel() {
     }
 
     fun search(query: String) {
-        searchTracksUseCase.search(query, 0).subscribe({
-
-        }, {
+        searchTracksUseCase.search(query).subscribe({}, {
             it.printStackTrace()
-        })
+        }).also {
+            disposables.add(it)
+        }
     }
 
     override fun onCleared() {

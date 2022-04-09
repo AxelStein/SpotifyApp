@@ -1,6 +1,5 @@
 package com.example.spotifyapp.domain
 
-import android.util.Log
 import com.example.spotifyapp.data.entities.Track
 import com.example.spotifyapp.data.room.TrackDao
 import com.example.spotifyapp.data.spotify_api.SpotifyApi
@@ -29,7 +28,6 @@ class SearchTracksUseCase(
         }.doOnNext {
             result.addAll(it)
         }.doOnComplete {
-            Log.e("TAG", "complete $result")
             trackDao.deleteAll()
             trackDao.insert(result)
         }
@@ -45,7 +43,6 @@ class SearchTracksUseCase(
     }
 
     private fun queryFromApi(query: String, offset: Int, threadNumber: Int): List<Track> {
-        Log.e("TAG", "queryFromApi $query offset=$offset threadNumber=$threadNumber")
         val response = spotifyApi.search(query, offset).execute()
         if (response.isSuccessful) {
             return response.body()!!.items

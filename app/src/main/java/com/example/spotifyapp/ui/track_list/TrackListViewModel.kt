@@ -22,6 +22,9 @@ class TrackListViewModel : ViewModel() {
     private val trackList = MutableLiveData<List<Track>>()
     val trackListLiveData = trackList as LiveData<List<Track>>
 
+    private val loading = MutableLiveData<Boolean>()
+    val loadingLiveData = loading as LiveData<Boolean>
+
     private val disposables = CompositeDisposable()
 
     init {
@@ -40,11 +43,18 @@ class TrackListViewModel : ViewModel() {
     }
 
     fun search(query: String) {
-        searchTracksUseCase.search(query).subscribe({}, {
-            it.printStackTrace()
-        }).also {
-            disposables.add(it)
-        }
+        searchTracksUseCase.search(query)
+            .doOnSubscribe {
+                loading.postValue(true)
+            }
+            .doOnComplete {
+                loading.postValue(false)
+            }
+            .subscribe({}, {
+                it.printStackTrace()
+            }).also {
+                disposables.add(it)
+            }
     }
 
     override fun onCleared() {

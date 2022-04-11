@@ -37,7 +37,7 @@ class SearchTracksUseCase(
             searchSpotifyApi(query, offsetQueue.take()).onEach {
                 it.threadNumber = threadNumber
             }
-        }.subscribeOn(Schedulers.single())
+        }.subscribeOn(Schedulers.io())
     }
 
     private fun searchSpotifyApi(query: String, offset: Int): List<Track> {

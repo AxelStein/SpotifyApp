@@ -54,12 +54,10 @@ class TrackListViewModel : ViewModel() {
         searchTracksUseCase.search(query)
             .doOnSubscribe {
                 loading.postValue(true)
-            }
-            .doFinally {
+            }.doFinally {
                 searchDisposable = null
                 loading.postValue(false)
-            }
-            .subscribe({}, {
+            }.subscribe({}, {
                 it.printStackTrace()
             }).also {
                 searchDisposable = it

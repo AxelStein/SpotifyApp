@@ -5,13 +5,16 @@ import com.example.spotifyapp.data.room.TrackDao
 import com.example.spotifyapp.data.spotify_api.SpotifyApi
 import io.reactivex.Flowable
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers.io
+import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 
 class SearchTracksUseCase(
     private val spotifyApi: SpotifyApi,
     private val trackDao: TrackDao
     ) {
+    private val threadPool = Executors.newFixedThreadPool(2)
+
     fun search(query: String): Flowable<List<Track>> {
         val offsetQueue = LinkedBlockingQueue<Int>()
         for (i in 0..30 step 10) {
@@ -33,7 +36,7 @@ class SearchTracksUseCase(
     private fun createThread(query: String, offsetQueue: LinkedBlockingQueue<Int>, threadNumber: Int): Flowable<List<Track>> {
         return Single.fromCallable {
             searchSpotifyApi(query, offsetQueue.take(), threadNumber)
-        }.repeatUntil { offsetQueue.isEmpty() }.subscribeOn(io())
+        }.repeatUntil { offsetQueue.isEmpty() }.subscribeOn(Schedulers.from(threadPool))
     }
 
     private fun searchSpotifyApi(query: String, offset: Int, threadNumber: Int): List<Track> {

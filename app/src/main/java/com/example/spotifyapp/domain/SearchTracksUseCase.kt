@@ -32,9 +32,7 @@ class SearchTracksUseCase(
 
     private fun createThread(query: String, offsetQueue: LinkedBlockingQueue<Int>, threadNumber: Int): Flowable<List<Track>> {
         return Single.fromCallable {
-            searchSpotifyApi(query, offsetQueue.take(), threadNumber).also {
-                Thread.sleep(2000)
-            }
+            searchSpotifyApi(query, offsetQueue.take(), threadNumber)
         }.repeatUntil { offsetQueue.isEmpty() }.subscribeOn(io())
     }
 

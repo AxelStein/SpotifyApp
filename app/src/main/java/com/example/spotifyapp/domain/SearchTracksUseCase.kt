@@ -7,6 +7,7 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers.io
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.atomic.AtomicReference
 
 class SearchTracksUseCase(
     private val spotifyApi: SpotifyApi,
@@ -17,22 +18,24 @@ class SearchTracksUseCase(
         for (i in 0..30 step 10) {
             offsetQueue.add(i)
         }
-        val result = mutableListOf<Track>()
+        val result = AtomicReference<MutableList<Track>>(mutableListOf())
         return createThread(query, offsetQueue, 1)
             .zipWith(createThread(query, offsetQueue, 2)) { l1, l2 ->
                 l1+l2
             }.doOnComplete {
                 trackDao.deleteAll()
-                trackDao.insert(result)
+                trackDao.insert(result.get())
             }
             .doOnNext {
-                result.addAll(it)
+                result.get().addAll(it)
             }
     }
 
     private fun createThread(query: String, offsetQueue: LinkedBlockingQueue<Int>, threadNumber: Int): Flowable<List<Track>> {
         return Single.fromCallable {
-            searchSpotifyApi(query, offsetQueue.take(), threadNumber)
+            searchSpotifyApi(query, offsetQueue.take(), threadNumber).also {
+                Thread.sleep(2000)
+            }
         }.repeatUntil { offsetQueue.isEmpty() }.subscribeOn(io())
     }
 

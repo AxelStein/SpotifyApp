@@ -5,7 +5,7 @@ import com.example.spotifyapp.data.room.TrackDao
 import com.example.spotifyapp.data.spotify_api.SpotifyApi
 import io.reactivex.Flowable
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.schedulers.Schedulers.io
 import java.util.concurrent.LinkedBlockingQueue
 
 class SearchTracksUseCase(
@@ -19,17 +19,19 @@ class SearchTracksUseCase(
         }
 
         val result = mutableListOf<Track>()
-        return searchSingle(offsetQueue, query, 1).
-        zipWith(searchSingle(offsetQueue, query, 2)) { list1, list2 ->
-            list1 + list2
-        }.repeatUntil {
-            offsetQueue.isEmpty()
-        }.doOnNext {
-            result.addAll(it)
-        }.doOnComplete {
-            trackDao.deleteAll()
-            trackDao.insert(result)
-        }
+        return searchSingle(offsetQueue, query, 1).subscribeOn(io())
+            .zipWith(searchSingle(offsetQueue, query, 2)) { list1, list2 ->
+                list1 + list2
+            }
+            .subscribeOn(io())
+            .repeatUntil {
+                offsetQueue.isEmpty()
+            }.doOnNext {
+                result.addAll(it)
+            }.doOnComplete {
+                trackDao.deleteAll()
+                trackDao.insert(result)
+            }
     }
 
     private fun searchSingle(offsetQueue: LinkedBlockingQueue<Int>, query: String, threadNumber: Int): Single<List<Track>> {
@@ -37,7 +39,7 @@ class SearchTracksUseCase(
             searchSpotifyApi(query, offsetQueue.take()).onEach {
                 it.threadNumber = threadNumber
             }
-        }.subscribeOn(Schedulers.io())
+        }
     }
 
     private fun searchSpotifyApi(query: String, offset: Int): List<Track> {

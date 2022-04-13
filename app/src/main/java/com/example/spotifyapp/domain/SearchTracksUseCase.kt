@@ -4,7 +4,6 @@ import com.example.spotifyapp.data.entities.Track
 import com.example.spotifyapp.data.room.TrackDao
 import com.example.spotifyapp.data.spotify_api.SpotifyApi
 import io.reactivex.Flowable
-import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
@@ -21,10 +20,10 @@ class SearchTracksUseCase(
             offsetQueue.add(i)
         }
         val result = mutableListOf<Track>()
-        return createThread(query, offsetQueue, 1)
-            .zipWith(createThread(query, offsetQueue, 2)) { l1, l2 ->
-                l1+l2
-            }.doOnComplete {
+        val t1 = createThread(query, offsetQueue, 1)
+        val t2 = createThread(query, offsetQueue, 2)
+        return Flowable.merge(t1, t2)
+            .doOnComplete {
                 trackDao.deleteAll()
                 trackDao.insert(result)
             }
@@ -33,13 +32,21 @@ class SearchTracksUseCase(
             }
     }
 
-    private fun createThread(query: String, offsetQueue: LinkedBlockingQueue<Int>, threadNumber: Int): Flowable<List<Track>> {
-        return Single.fromCallable {
+    private fun createThread(
+        query: String,
+        offsetQueue: LinkedBlockingQueue<Int>,
+        threadNumber: Int
+    ): Flowable<List<Track>> {
+        return Flowable.fromCallable {
             searchSpotifyApi(query, offsetQueue.take(), threadNumber)
         }.repeatUntil { offsetQueue.isEmpty() }.subscribeOn(Schedulers.from(threadPool))
     }
 
-    private fun searchSpotifyApi(query: String, offset: Int, threadNumber: Int): List<Track> {
+    private fun searchSpotifyApi(
+        query: String,
+        offset: Int,
+        threadNumber: Int
+    ): List<Track> {
         val response = spotifyApi.search(query, offset).execute()
         if (response.isSuccessful) {
             return response.body()!!.items.onEach { track ->

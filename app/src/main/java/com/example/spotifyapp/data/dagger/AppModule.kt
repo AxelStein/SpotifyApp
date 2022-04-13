@@ -63,7 +63,6 @@ class AppModule(private val context: Context) {
     }
 
     @Provides
-    @Singleton
     fun provideSearchTrackUseCase(api: SpotifyApi, dao: TrackDao): SearchTracksUseCase {
         return SearchTracksUseCase(api, dao)
     }

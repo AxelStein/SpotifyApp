@@ -1,5 +1,6 @@
 package com.example.spotifyapp.domain
 
+import android.util.Log
 import com.example.spotifyapp.data.entities.Track
 import com.example.spotifyapp.data.room.TrackDao
 import com.example.spotifyapp.data.spotify_api.SpotifyApi
@@ -13,7 +14,7 @@ class SearchTracksUseCase(
     private val spotifyApi: SpotifyApi,
     private val trackDao: TrackDao
     ) {
-    private val threadPool = Executors.newFixedThreadPool(2)
+    private var threadPool = Executors.newFixedThreadPool(2)
 
     fun search(query: String): Flowable<List<Track>> {
         val offsetQueue = LinkedBlockingQueue<Int>()
@@ -51,6 +52,9 @@ class SearchTracksUseCase(
         offset: Int,
         threadNumber: Int
     ): List<Track> {
+        Thread.currentThread().run {
+            Log.e("TAG", "query=$query offset=$offset thread=$threadNumber current=$id $name")
+        }
         val response = spotifyApi.search(query, offset).execute()
         if (response.isSuccessful) {
             return response.body()!!.items.onEach { track ->
@@ -59,5 +63,9 @@ class SearchTracksUseCase(
         } else {
             throw Exception(response.errorBody()!!.string())
         }
+    }
+
+    fun clear() {
+        threadPool.shutdown()
     }
 }

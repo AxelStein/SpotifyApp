@@ -67,6 +67,7 @@ class TrackListViewModel : ViewModel() {
 
     override fun onCleared() {
         disposables.clear()
+        searchTracksUseCase.clear()
         super.onCleared()
     }
 }

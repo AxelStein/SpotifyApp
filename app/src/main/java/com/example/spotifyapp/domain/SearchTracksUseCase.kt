@@ -7,6 +7,7 @@ import io.reactivex.Flowable
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 
 class SearchTracksUseCase(
     private val spotifyApi: SpotifyApi,
@@ -39,7 +40,10 @@ class SearchTracksUseCase(
     ): Flowable<List<Track>> {
         return Flowable.fromCallable {
             searchSpotifyApi(query, offsetQueue.take(), threadNumber)
-        }.repeatUntil { offsetQueue.isEmpty() }.subscribeOn(Schedulers.from(threadPool))
+        }
+            .timeout(3, TimeUnit.SECONDS, Flowable.empty())
+            .repeatUntil { offsetQueue.isEmpty() }
+            .subscribeOn(Schedulers.from(threadPool))
     }
 
     private fun searchSpotifyApi(

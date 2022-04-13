@@ -1,6 +1,5 @@
 package com.example.spotifyapp.domain
 
-import android.util.Log
 import com.example.spotifyapp.data.entities.Track
 import com.example.spotifyapp.data.room.TrackDao
 import com.example.spotifyapp.data.spotify_api.SpotifyApi
@@ -52,9 +51,6 @@ class SearchTracksUseCase(
         offset: Int,
         threadNumber: Int
     ): List<Track> {
-        Thread.currentThread().run {
-            Log.e("TAG", "query=$query offset=$offset thread=$threadNumber current=$id $name")
-        }
         val response = spotifyApi.search(query, offset).execute()
         if (response.isSuccessful) {
             return response.body()!!.items.onEach { track ->

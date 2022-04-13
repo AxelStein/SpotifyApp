@@ -31,7 +31,10 @@ class TrackListFragment : Fragment() {
 
         adapter = TrackListAdapter()
         adapter.setOnItemClickListener { pos, item ->
-            findNavController().navigate(R.id.action_open_track_detail, bundleOf("url" to item.externalUrl))
+            findNavController().navigate(
+                R.id.action_open_track_detail,
+                bundleOf("url" to item.externalUrl)
+            )
         }
         binding.list.adapter = adapter
 

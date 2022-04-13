@@ -21,12 +21,14 @@ class SearchTracksUseCase(
             offsetQueue.add(i)
         }
         val result = mutableListOf<Track>()
-        val t1 = createThread(query, offsetQueue, 1)
-        val t2 = createThread(query, offsetQueue, 2)
+        val t1 = createThread(query, offsetQueue)
+        val t2 = createThread(query, offsetQueue)
         return Flowable.merge(t1, t2)
             .doOnComplete {
-                trackDao.deleteAll()
-                trackDao.insert(result)
+                if (result.isNotEmpty()) {
+                    trackDao.deleteAll()
+                    trackDao.insert(result)
+                }
             }
             .doOnNext {
                 result.addAll(it)
@@ -35,11 +37,10 @@ class SearchTracksUseCase(
 
     private fun createThread(
         query: String,
-        offsetQueue: LinkedBlockingQueue<Int>,
-        threadNumber: Int
+        offsetQueue: LinkedBlockingQueue<Int>
     ): Flowable<List<Track>> {
         return Flowable.fromCallable {
-            searchSpotifyApi(query, offsetQueue.take(), threadNumber)
+            searchSpotifyApi(query, offsetQueue.take())
         }
             .timeout(3, TimeUnit.SECONDS, Flowable.empty())
             .repeatUntil { offsetQueue.isEmpty() }
@@ -48,9 +49,9 @@ class SearchTracksUseCase(
 
     private fun searchSpotifyApi(
         query: String,
-        offset: Int,
-        threadNumber: Int
+        offset: Int
     ): List<Track> {
+        val threadNumber = Thread.currentThread().id.toInt()
         val response = spotifyApi.search(query, offset).execute()
         if (response.isSuccessful) {
             return response.body()!!.items.onEach { track ->

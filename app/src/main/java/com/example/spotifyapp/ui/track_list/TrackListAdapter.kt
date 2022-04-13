@@ -32,10 +32,10 @@ class TrackListAdapter : ListAdapter<Track, TrackListAdapter.ViewHolder>(Compani
 
     private var onItemCLickListener: OnItemClickListener<Track>? = null
 
-    fun setOnItemClickListener(l: (pos: Int, item: Track) -> Unit) {
+    fun setOnItemClickListener(callback: (pos: Int, item: Track) -> Unit) {
         onItemCLickListener = object : OnItemClickListener<Track> {
             override fun onItemClick(pos: Int, item: Track) {
-                l(pos, item)
+                callback(pos, item)
             }
         }
     }
@@ -56,9 +56,11 @@ class TrackListAdapter : ListAdapter<Track, TrackListAdapter.ViewHolder>(Compani
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val binding = TrackItemBinding.bind(itemView)
 
-        fun setOnClickListener(l: (pos: Int) -> Unit) {
+        fun setOnClickListener(callback: (pos: Int) -> Unit) {
             binding.container.setOnClickListener {
-                l(adapterPosition)
+                if (adapterPosition != -1) {
+                    callback(adapterPosition)
+                }
             }
         }
 
